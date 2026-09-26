@@ -98,7 +98,7 @@ Runs are stored independently so previous executions remain reproducible even as
   <img src="screenshots/campaigns.png"
        alt="Hunt Tracker campaigns"
        width="49%">
-  <img src="screenshots/insights.png"
+  <img src="screenshots/campaign-overview.png"
        alt="Hunt Tracker campaigns"
        width="49%">
 </p>
