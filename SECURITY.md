@@ -30,7 +30,7 @@ Report it privately through GitHub:
 2. Click **Report a vulnerability**.
 3. Fill in the form.
 
-Direct link: [Report a vulnerability]()
+Direct link: [Report a vulnerability](https://github.com/glikoaop0/hunt-tracker/security)
 
 Only the maintainer can see your report. If an advisory is published, you are credited in it.
 
