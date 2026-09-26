@@ -34,7 +34,7 @@ def client() -> Iterator[TestClient]:
             query="index=dns | stats count by query_domain",
             status=HuntStatus.active,
             priority=4,
-            data_sources="Splunk, S1 Deep Visibility",
+            data_sources="Splunk, CrowdStrike",
             attack_techniques="T1071.004",
             cadence_days=14,
             next_run=date(2026, 1, 1),
@@ -88,7 +88,7 @@ def test_hunt_detail_shows_header_hypothesis_query_and_metadata(
     assert "Active" in response.text
     assert "1 run" in response.text
     assert "Splunk" in response.text
-    assert "S1 Deep Visibility" in response.text
+    assert "CrowdStrike" in response.text
     assert "T1071.004" in response.text
 
 
