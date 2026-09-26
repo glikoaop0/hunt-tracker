@@ -6,7 +6,7 @@
 ![Local only](https://img.shields.io/badge/runs-local%20only-informational)
 
 ![Hunt Tracker board](screenshots/board.png)
-
+Move hypotheses from initial idea to scoped, active, and eventually retired hunts.
 ---
 
 ## Why it exists
