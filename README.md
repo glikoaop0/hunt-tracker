@@ -1,39 +1,167 @@
 # Hunt Tracker
 
-**Track threat hunts through their whole lifecycle: from hypothesis, to a recurring cadence of logged runs, to a retirement that records *why*.**
+**A local-first workspace for managing the threat hunting lifecycle; from hypothesis to repeated runs, evidence, and operational outcome.**
 
 ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)
 ![Local only](https://img.shields.io/badge/runs-local%20only-informational)
 
-![Hunt Tracker board](screenshots/board.png)
+> **Threat hunting is a lifecycle, not a folder of saved queries.**
 
-Move hypotheses from initial idea to scoped, active, and eventually retired hunts.
+<p align="center">
+  <img src="screenshots/board.png" alt="Hunt Tracker board" width="100%">
+</p>
+
+Hunt Tracker is a lightweight workspace for security analysts who want to manage threat hunts as a **repeatable operational process**, rather than a collection of saved queries scattered across spreadsheets, tickets, and notes.
+
+Define a hypothesis, scope the hunt, preserve reproducible runs, track exclusions, organize related work into campaigns, and retire hunts with an explicit outcome.
 
 ---
 
-## Why it exists
+## Why Hunt Tracker?
 
-Most hunt programs quietly die in a spreadsheet or a notes app. A hunt gets run once, never re-run, and when it's dropped nobody records whether it became a detection, failed for lack of telemetry, or was simply forgotten.
+Most hunt programs quietly die in a spreadsheet or a notes app.
 
-Hunt Tracker treats each hunt as a living ticket built around a **hypothesis** and a **query**. Every execution is logged as a run with an explicit outcome and a snapshot of the query used. Hunts can run on a cadence, so you see what's overdue. And when a hunt is retired, the reason is kept, so over time you learn what your hunting actually produces.
+A hunt starts with a hypothesis. Then the query changes. It gets executed again. An exclusion is added. New telemetry becomes available. Nothing is found for three months. Or something *is* found and the hunt eventually becomes a detection.
 
-It's small, local and single-user by design: no accounts, no cloud, no integrations. Just your hunts, on your machine.
+The query is only one part of that history.
 
-## Key features
+Hunt Tracker keeps the full lifecycle together so you can answer:
 
-- **Lifecycle board**: Idea → Scoped → Active → Retired, with drag-and-drop, filters, and overdue warnings.
-- **Guided next step**: each hunt page shows where it stands in the lifecycle and offers the natural next action.
-- **Run history with query snapshots**: every run records its outcome, search window, result count and notes, plus the exact query used at that time. Editing a query never rewrites the past.
-- **Cadence scheduling**: set a hunt to repeat every N days; the next run date advances as you log runs.
-- **Retirement with a reason**: converted to detection, missing telemetry, hypothesis rejected, and more. Reactivating keeps the previous retirement as history.
-- **Exclusions**: track known-benign values per hunt, with a reason. Deactivated, never deleted.
-- **Campaigns**: group related hunts around one investigation objective, with scope, activity and a written conclusion.
-- **Insights**: lifecycle distribution, run outcomes, retirement reasons, and a 12-month activity heatmap.
-- **Export**: full JSON export, SQLite backup download, and per-hunt Markdown (ready to paste into Obsidian).
+- **What are we hunting?**
+- **Why does this hunt exist?**
+- **When was it last executed?**
+- **What query did we actually run at that point in time?**
+- **What did we find?**
+- **What exclusions or assumptions affected the results?**
+- **Why was the hunt retired?**
+- **Did it produce a detection, reveal a telemetry gap, or reject the original hypothesis?**
+
+---
+
+## The Hunt Lifecycle
+
+<p align="center">
+  <img src="screenshots/hunt-lifecycle.png" alt="Hunt Tracker lifecycle" width="850">
+</p>
+
+Hunts move through a deliberately simple lifecycle:
+
+**Idea → Scoped → Active → Retired**
+
+The status tells you where a hunt is today.
+
+Its run history tells you **how it got there**.
+
+An active hunt can be executed repeatedly while preserving each run independently. When the hunt is no longer useful as recurring hunting activity, it is retired with a reason instead of simply disappearing from the board.
+
+Typical retirement outcomes include:
+
+- Converted to detection
+- Hypothesis rejected
+- Missing or insufficient telemetry
+- Superseded by another hunt
+- No longer relevant
+- Other documented operational reason
+
+---
+
+
+## See It in Action
+
+### Organize hunting work
+
+<p align="center">
+  <img src="screenshots/board.png" alt="Hunt Tracker hunt board" width="100%">
+</p>
+
+The board provides a simple view of the hunting pipeline across **Idea, Scoped, Active, and Retired** hunts.
+
+Priority, cadence, ATT&CK context, run activity, and overdue state remain visible without turning the application into another ticketing system.
+
+---
+
+### Preserve every execution
+
+<p align="center">
+  <img src="screenshots/hunt-detail.png" alt="Hunt Tracker hunt details and run history" width="100%">
+</p>
+
+Each hunt keeps its hypothesis, query, metadata, exclusions, and execution history together.
+
+Runs are stored independently so previous executions remain reproducible even as the hunt evolves.
+
+---
+
+### Group related hunts into campaigns
+
+<p align="center">
+  <img src="screenshots/campaigns.png" alt="Hunt Tracker campaigns" width="100%">
+</p>
+
+Campaigns group hunts around a broader investigation, threat scenario, technology, or security objective without changing the lifecycle of the individual hunts.
+
+---
+
+### Understand the hunting program
+
+<p align="center">
+  <img src="screenshots/insights.png" alt="Hunt Tracker insights" width="100%">
+</p>
+
+Insights provide a lightweight view into hunting activity, lifecycle distribution, run outcomes, retirement reasons, and how the program evolves over time.
+
+---
+
+## Features
+
+### Hunt Management
+
+- Hunt lifecycle: Idea, Scoped, Active, Retired
+- Hypotheses and hunting context
+- Priority and cadence
+- Data-source tracking
+- MITRE ATT&CK techniques
+- Overdue-hunt visibility
+- Explicit retirement reasons
+
+### Reproducible Runs
+
+- Immutable run history
+- Query snapshots
+- Search windows
+- Result counts
+- Run outcomes
+- Analyst notes
+- Reverse-chronological execution history
+
+### Hunting Context
+
+- Active exclusions
+- Campaigns
+- Hunt metadata
+- Search and filtering
+- Lifecycle and activity insights
+
+### Export & Backup
+
+- Full JSON export
+- SQLite backup
+- Portable local data
+
+### Demo Mode
+
+- Dedicated demo database
+- Separate runtime configuration
+- Visible demo-mode indicator
+
+---
 
 ## Quick start
 
-Requirements: **Python 3.11+** and **git**. No Node, no build step, no Docker, no external service.
+### Requirements
+
+- Python 3.11+
+- Git
 
 ### Windows (PowerShell)
 
@@ -45,10 +173,6 @@ python -m venv .venv
 pip install -r requirements.txt
 python -m uvicorn app.main:app --reload
 ```
-
-> If `Activate.ps1` fails with an execution policy error, run this once, then retry:
-> `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
-
 
 ### macOS / Linux
 
@@ -64,6 +188,7 @@ python -m uvicorn app.main:app --reload
 Then open **http://127.0.0.1:8000**. The app creates its database on first start, and the board starts empty.
 
 Next time, you only need to activate the virtual environment and run the last command.
+
 
 ## Demo mode
 
@@ -95,22 +220,48 @@ All data lives in a single SQLite file in the project root: `hunts.db` (or `demo
 
   It backs up your database to `backups/` first, then adds any missing tables and columns. Safe to run repeatedly.
 
-## How it works
+---
 
-**Core objects**
+## Architecture
 
-- **Hunt**: hypothesis, query, status, priority (1–5), data sources, ATT&CK technique IDs, Markdown notes, optional cadence.
-- **Run**: one execution of a hunt, with an outcome (*No findings, Findings, Inconclusive, Detection opportunity*), optional duration, search window and result count, notes, and a query snapshot.
-- **Exclusion**: a known-benign value and why it's excluded.
-- **Campaign**: a group of hunts around one objective. A hunt can belong to several campaigns.
+Hunt Tracker deliberately uses a small local architecture.
 
-**Rules the app enforces**
+```text
+┌─────────────────────────────┐
+│       Jinja2 + HTMX         │
+│            UI               │
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│          FastAPI            │
+│     Routes / Validation     │
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│       Domain / Service      │
+│            Logic            │
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│           SQLite            │
+│       Local Hunt Data       │
+└─────────────────────────────┘
+```
 
-- Retiring always requires a reason. Other status moves are free.
-- Logging a run advances the next run date by the cadence.
-- Past runs keep their own query snapshot, even if the hunt's query changes.
-- Closing a campaign never retires its hunts; unlinking never deletes them.
-- Deleting a hunt is permanent and requires typing `DELETE` on a confirmation page that lists exactly what will be removed.
+### Stack
+
+- **FastAPI** : backend and routing
+- **Jinja2** : server-rendered templates
+- **HTMX** : targeted UI interactions
+- **SQLite** : local persistence
+- **Pytest** : automated testing
+
+
+---
+
 
 ## Security
 
@@ -142,6 +293,12 @@ Ideas being considered for future versions:
 - Sigma rule stub when a hunt is retired as "converted to detection"
 - Query versioning with diffs
 
+The goal is not to turn Hunt Tracker into a SIEM or SOAR.
+
+New features should strengthen the core workflow:
+
+> **Capture better hunts, execute them reproducibly, learn from them, and preserve the outcome.**
+
 Suggestions are welcome: open an issue.
 
 ## Running the tests
@@ -153,14 +310,6 @@ python -m pytest
 ```
 
 Tests run against an in-memory database and never touch your real data.
-
-## Tech stack
-
-- **Backend**: Python, FastAPI, Uvicorn
-- **Database**: SQLite via SQLModel, one local file
-- **Frontend**: Jinja2 templates + HTMX (vendored), plain CSS, self-hosted fonts
-- **Markdown**: Python-Markdown, sanitized with nh3
-- No Node, no bundler, no CDN. All dependencies pinned in `requirements.txt`.
 
 
 
@@ -182,4 +331,10 @@ Vendored components:
 ## License
 
 No license has been chosen yet
+
+---
+
+<p align="center">
+  <strong>Hunt deliberately. Preserve the evidence. Learn from every run.</strong>
+</p>
 
