@@ -181,5 +181,5 @@ Vendored components:
 
 ## License
 
-No license has been chosen yet. All rights are reserved by the author.
+No license has been chosen yet
 
