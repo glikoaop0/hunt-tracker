@@ -6,7 +6,9 @@
 ![Local only](https://img.shields.io/badge/runs-local%20only-informational)
 
 ![Hunt Tracker board](screenshots/board.png)
+
 Move hypotheses from initial idea to scoped, active, and eventually retired hunts.
+
 ---
 
 ## Why it exists
@@ -47,7 +49,6 @@ python -m uvicorn app.main:app --reload
 > If `Activate.ps1` fails with an execution policy error, run this once, then retry:
 > `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
 
-**Shortcut:** after the first setup, just double-click `run.bat`.
 
 ### macOS / Linux
 
@@ -78,9 +79,8 @@ $env:HUNT_TRACKER_DB = "demo"; python -m uvicorn app.main:app --reload --port 80
 HUNT_TRACKER_DB=demo python -m uvicorn app.main:app --reload --port 8001
 ```
 
-On Windows you can also double-click `run-demo.bat`. Demo mode opens on **http://127.0.0.1:8001** and never touches your real data.
+Demo mode opens on **http://127.0.0.1:8001** and never touches your real data.
 
-> In PowerShell the variable stays set for that window. Open a new window (or run `Remove-Item Env:HUNT_TRACKER_DB`) before starting the app on your real data. Any value other than `demo` makes the app refuse to start, so it can never silently fall back to the wrong database.
 
 ## Data and backups
 
