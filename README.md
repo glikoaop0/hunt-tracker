@@ -118,7 +118,7 @@ Hunt Tracker is a **single-user app meant to run on your own machine**, bound to
 
 **Do not** expose it on a network (e.g. `--host 0.0.0.0`), put it behind a public reverse proxy, or run it on a shared server.
 
-Built-in protections include CSRF protection on every change, sanitized Markdown rendering, and strict security headers. Your database, backups and exports contain your hunts, queries and exclusions in plain text, so treat them like any other investigation data.
+Built-in protections include CSRF protection on every change, sanitized Markdown rendering. Your database, backups and exports contain your hunts, queries and exclusions in plain text, so treat them like any other investigation data.
 
 See [SECURITY.md](SECURITY.md) for the threat model, known limitations, and how to report a vulnerability.
 
