@@ -95,7 +95,12 @@ Runs are stored independently so previous executions remain reproducible even as
 ### Group related hunts into campaigns
 
 <p align="center">
-  <img src="screenshots/campaigns.png" alt="Hunt Tracker campaigns" width="100%">
+  <img src="screenshots/campaigns.png"
+       alt="Hunt Tracker campaigns"
+       width="49%">
+  <img src="screenshots/insights.png"
+       alt="Hunt Tracker campaigns"
+       width="49%">
 </p>
 
 Campaigns group hunts around a broader investigation, threat scenario, technology, or security objective without changing the lifecycle of the individual hunts.
