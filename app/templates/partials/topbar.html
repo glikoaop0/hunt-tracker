@@ -1,0 +1,19 @@
+<header class="shell-bar">
+    <div class="shell-identity">
+        <a href="/" class="shell-wordmark">Hunt Tracker</a>
+        {% if shell_context %}
+            <span class="shell-sep" aria-hidden="true">/</span>
+            <span class="shell-context">{{ shell_context }}</span>
+        {% endif %}
+        {% if demo_mode %}
+            <span class="shell-demo" title="Running against demo.db, not hunts.db">DEMO DATA</span>
+        {% endif %}
+    </div>
+    <nav class="shell-nav">
+        <a href="/" class="{{ 'shell-nav-active' if request.url.path == '/' else '' }}">Board</a>
+        <a href="/campaigns" class="{{ 'shell-nav-active' if request.url.path.startswith('/campaigns') else '' }}">Campaigns</a>
+        <a href="/insights" class="{{ 'shell-nav-active' if request.url.path == '/insights' else '' }}">Insights</a>
+        <a href="/export" class="{{ 'shell-nav-active' if request.url.path == '/export' else '' }}">Export</a>
+    </nav>
+</header>
+<div id="app-error" role="alert" class="app-error"></div>

@@ -1,0 +1,97 @@
+<section class="panel heatmap-panel" aria-labelledby="heatmap-title">
+    <header class="heatmap-header">
+        <div>
+            <h2 id="heatmap-title">Recorded hunting activity</h2>
+            <p class="heatmap-period">
+                Trailing 12 calendar months &middot; <strong>{{ heatmap.period_label }}</strong> &middot; dates in {{ heatmap.timezone_label }}
+            </p>
+        </div>
+        <p class="heatmap-scope">Independent of the date range below. Each run is placed on the {{ heatmap.timezone_label }} date it was <em>recorded</em>; search windows are not used.</p>
+    </header>
+
+    <div class="summary-strip heatmap-metrics">
+        <div class="summary-stat">
+            <span class="summary-value">{{ heatmap.total_runs }}</span>
+            <span class="summary-label">Runs in period</span>
+        </div>
+        <div class="summary-stat">
+            <span class="summary-value">{{ heatmap.distinct_hunts }}</span>
+            <span class="summary-label">Distinct hunts run</span>
+        </div>
+        <div class="summary-stat">
+            <span class="summary-value">{{ heatmap.active_days }}</span>
+            <span class="summary-label">Active days</span>
+        </div>
+        <div class="summary-stat">
+            <span class="summary-value">{{ heatmap.runs_this_week }}</span>
+            <span class="summary-label">Runs this week <span class="summary-sublabel">({{ heatmap.week_label }}, {{ heatmap.timezone_label }})</span></span>
+        </div>
+    </div>
+
+    {% if heatmap.total_runs == 0 %}
+        <p class="heatmap-empty-note">No runs have been recorded in this period yet.</p>
+    {% endif %}
+
+    <div class="heatmap-frame" id="heatmap-frame">
+        <div class="heatmap-scroll">
+            <div class="heatmap" style="--weeks: {{ heatmap.weeks }}">
+                <div class="heatmap-months" aria-hidden="true">
+                    {% for label in heatmap.month_labels %}
+                        <span class="heatmap-month" style="grid-column: {{ label.column + 1 }}">{{ label.text }}</span>
+                    {% endfor %}
+                </div>
+                <div class="heatmap-weekdays" aria-hidden="true">
+                    {% for axis_label in heatmap.weekday_axis %}
+                        <span>{{ axis_label }}</span>
+                    {% endfor %}
+                </div>
+                <div class="heatmap-grid" id="heatmap-grid" role="grid" aria-labelledby="heatmap-title" aria-describedby="heatmap-help"
+                     hx-target="#heatmap-day" hx-swap="innerHTML" hx-indicator="#heatmap-day-region" hx-sync="#heatmap-grid:replace">
+                    {% for row in heatmap.rows %}
+                        {% set row_index = loop.index0 %}
+                        <div class="heatmap-row" role="row" aria-label="{{ heatmap.weekday_names[row_index] }}">
+                            {% for cell in row %}
+                                {% if cell is none %}
+                                    <div class="heatmap-pad" role="presentation" aria-hidden="true"></div>
+                                {% else %}
+                                    <div class="heatmap-gridcell" role="gridcell" aria-selected="false">
+                                        <button type="button"
+                                                class="heatmap-cell level-{{ cell.level }}{{ ' has-findings' if cell.has_findings else '' }}"
+                                                tabindex="{{ 0 if cell.day == heatmap.focus_day else -1 }}"
+                                                data-row="{{ row_index }}" data-col="{{ loop.index0 }}"
+                                                data-date="{{ cell.day.isoformat() }}"
+                                                data-runs="{{ cell.run_count }}" data-hunts="{{ cell.hunt_count }}" data-findings="{{ cell.findings_count }}"
+                                                aria-label="{{ cell.aria_label }}"
+                                                hx-get="/insights/activity/day?date={{ cell.day.isoformat() }}"></button>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="heatmap-tooltip" id="heatmap-tooltip" aria-hidden="true" hidden></div>
+    </div>
+
+    <div class="heatmap-footer">
+        <ul class="heatmap-legend" aria-label="Legend: runs per day">
+            <li class="heatmap-legend-label">Runs per day</li>
+            {% for level, text in heatmap.legend %}
+                <li class="heatmap-legend-item"><span class="heatmap-swatch level-{{ level }}" aria-hidden="true"></span>{{ text }}</li>
+            {% endfor %}
+            <li class="heatmap-legend-item heatmap-legend-findings"><span class="heatmap-swatch level-0 has-findings" aria-hidden="true"></span>Coral outline: at least one run marked Findings.</li>
+        </ul>
+        <p class="heatmap-caption">Recorded runs show activity, not investigation quality or defensive coverage.</p>
+    </div>
+
+    <p class="heatmap-help" id="heatmap-help">Select a day to list its runs. Use the arrow keys to move between days, and Enter or Space to select.</p>
+
+    <div class="heatmap-day-region" id="heatmap-day-region" aria-busy="false">
+        <p class="heatmap-loading" hidden>Loading runs&hellip;</p>
+        <div class="heatmap-day" id="heatmap-day">
+            <p class="empty-state">Select a day above to see the runs recorded on it.</p>
+        </div>
+    </div>
+    <p class="visually-hidden" id="heatmap-status" role="status" aria-live="polite"></p>
+</section>

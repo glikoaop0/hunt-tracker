@@ -1,0 +1,30 @@
+<div class="campaign-header" id="campaign-header">
+    <div class="campaign-header-top">
+        <div>
+            <p class="campaign-header-id">Campaign #{{ campaign.id }}</p>
+            <h1>{{ campaign.title }}</h1>
+            <p class="campaign-objective">{{ campaign.objective }}</p>
+        </div>
+        <div class="detail-actions">
+            <a href="/campaigns/{{ campaign.id }}/edit" class="btn btn-secondary">Edit campaign</a>
+            {% if campaign.status.value == "closed" %}
+                <form hx-post="/campaigns/{{ campaign.id }}/status" hx-target="#campaign-header" hx-swap="outerHTML">
+                    <input type="hidden" name="status" value="active">
+                    <button type="submit" class="btn btn-primary">Reopen campaign</button>
+                </form>
+            {% else %}
+                <form hx-post="/campaigns/{{ campaign.id }}/status" hx-target="#campaign-header" hx-swap="outerHTML">
+                    <input type="hidden" name="status" value="closed">
+                    <button type="submit" class="btn btn-secondary">Close campaign</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    <div class="campaign-header-badges">
+        <span class="badge badge-status-{{ campaign.status.value }}">{{ campaign.status.value | capitalize }}</span>
+        <span class="campaign-last-activity">
+            Last activity: {{ last_activity.date() if last_activity else "none yet" }}
+            <span title="Most recent of: a campaign edit, or a run logged against a hunt currently linked to this campaign.">&#9432;</span>
+        </span>
+    </div>
+</div>

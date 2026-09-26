@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>New hunt &middot; Hunt Tracker</title>
+    <link rel="stylesheet" href="/static/themes/terminal-console.css">
+</head>
+<body>
+    {% set shell_context = "New hunt" %}
+    {% include "partials/topbar.html" %}
+    <main class="container-fluid">
+        <p class="page-breadcrumb"><a href="/">&larr; Board</a></p>
+        <div class="form-page-header">
+            <h1>New hunt</h1>
+            <p class="panel-hint">Capture the idea now; query, scope and cadence can be added later.</p>
+        </div>
+
+        {% if error %}
+            <p class="form-error" role="alert">{{ error }}</p>
+        {% endif %}
+
+        <div class="form-with-aside">
+            <form class="hunt-form panel" method="post" action="/hunts">
+                {{ csrf_field() }}
+                <div class="field">
+                    <label for="hunt-title">Title</label>
+                    <input type="text" id="hunt-title" name="title" value="{{ title }}" required>
+                </div>
+
+                <div class="field">
+                    <label for="hunt-hypothesis">Hypothesis</label>
+                    <textarea id="hunt-hypothesis" name="hypothesis" rows="3" required>{{ hypothesis }}</textarea>
+                    <p class="field-hint">What are you testing? One or two sentences is enough.</p>
+                </div>
+
+                <div class="field">
+                    <label for="hunt-priority">Priority</label>
+                    <select id="hunt-priority" name="priority" required>
+                        <option value="" disabled {% if not priority %}selected{% endif %}>Choose priority&hellip;</option>
+                        {% for value in range(1, 6) %}
+                            <option value="{{ value }}" {% if priority == value|string %}selected{% endif %}>{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <a href="/" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Create hunt</button>
+                </div>
+            </form>
+
+            <aside class="form-aside panel" aria-labelledby="hunt-guide-title">
+                <h2 id="hunt-guide-title">From idea to recurring hunt</h2>
+                <ol class="form-aside-steps">
+                    <li>
+                        <strong>Capture the idea.</strong>
+                        A title and a testable hypothesis are enough, e.g. <em>"Attackers persist on Linux hosts through modified shell profile scripts."</em> New hunts start in Idea.
+                    </li>
+                    <li>
+                        <strong>Scope it.</strong>
+                        Open the hunt and choose Edit hunt to add the query, data sources and ATT&amp;CK techniques.
+                    </li>
+                    <li>
+                        <strong>Run it.</strong>
+                        Log each execution on the hunt page with an outcome. Set a cadence to make it recur; the next run date then advances on its own.
+                    </li>
+                    <li>
+                        <strong>Retire it.</strong>
+                        Drag the card to Retired on the board and record why: converted to a detection, hypothesis rejected, missing telemetry&hellip;
+                    </li>
+                </ol>
+            </aside>
+        </div>
+    </main>
+</body>
+</html>

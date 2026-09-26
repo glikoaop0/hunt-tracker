@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Insights &middot; Hunt Tracker</title>
+    <link rel="stylesheet" href="/static/themes/terminal-console.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="htmx-config" content='{"allowScriptTags": false, "allowEval": false}'>
+    <script src="/static/htmx.min.js"></script>
+    <script src="/static/csrf.js"></script>
+    <script src="/static/heatmap.js" defer></script>
+</head>
+<body>
+    {% set shell_context = "Insights" %}
+    {% include "partials/topbar.html" %}
+    <main class="container-fluid">
+        <p class="page-breadcrumb"><a href="/">&larr; Board</a></p>
+        <div class="form-page-header">
+            <h1>Insights</h1>
+            <p class="panel-hint">Operational activity and outcomes. Lifecycle totals are always all-time; period metrics use the range below.</p>
+        </div>
+
+        {% include "partials/activity_heatmap.html" %}
+
+        <nav class="range-nav" aria-label="Date range">
+            <a href="/insights?range=7" class="{{ 'range-active' if range_key == '7' else '' }}">Last 7 days</a>
+            <a href="/insights?range=30" class="{{ 'range-active' if range_key == '30' else '' }}">Last 30 days</a>
+            <a href="/insights?range=90" class="{{ 'range-active' if range_key == '90' else '' }}">Last 90 days</a>
+            <a href="/insights?range=all" class="{{ 'range-active' if range_key == 'all' else '' }}">All time</a>
+        </nav>
+
+        <div class="summary-strip insights-summary-strip">
+            <div class="summary-stat">
+                <span class="summary-value">{{ total_hunts }}</span>
+                <span class="summary-label">Total hunts (all time)</span>
+            </div>
+            <div class="summary-stat">
+                <span class="summary-value">{{ active_hunts }}</span>
+                <span class="summary-label">Active hunts</span>
+            </div>
+            <div class="summary-stat summary-stat-overdue">
+                <span class="summary-value">{{ overdue_hunts }}</span>
+                <span class="summary-label">Overdue hunts</span>
+            </div>
+            <div class="summary-stat">
+                <span class="summary-value">{{ runs_in_period_count }}</span>
+                <span class="summary-label">Runs in selected period</span>
+            </div>
+            <div class="summary-stat">
+                <span class="summary-value">{{ converted_to_detection }}</span>
+                <span class="summary-label">Retired &mdash; converted to detection (all time)</span>
+            </div>
+            <div class="summary-stat">
+                <span class="summary-value">{{ active_exclusions }}</span>
+                <span class="summary-label">Active exclusions</span>
+            </div>
+        </div>
+
+        <section class="panel">
+            <h2>Hunt lifecycle distribution</h2>
+            <p class="panel-hint">All time.</p>
+            <div class="bar-chart">
+                {% for status, count in lifecycle_rows %}
+                    <div class="bar-row">
+                        <span class="bar-label">{{ status.value | capitalize }}</span>
+                        <span class="bar-track"><span class="bar-fill" style="width: {{ (count / lifecycle_max * 100) | round(1) }}%"></span></span>
+                        <span class="bar-value">{{ count }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>Run outcomes</h2>
+            <p class="panel-hint">Selected period only.</p>
+            {% if runs_in_period_count > 0 %}
+                <div class="bar-chart">
+                    {% for outcome, count in outcome_rows %}
+                        <div class="bar-row">
+                            <span class="bar-label">{{ outcome.label }}</span>
+                            <span class="bar-track"><span class="bar-fill" style="width: {{ (count / outcome_max * 100) | round(1) }}%"></span></span>
+                            <span class="bar-value">{{ count }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-state">No runs were logged in this period.</p>
+            {% endif %}
+        </section>
+
+        <section class="panel">
+            <h2>Retirement reasons</h2>
+            <p class="panel-hint">All time, ranked by count. Only reasons actually used are shown.</p>
+            {% if retirement_rows %}
+                <div class="bar-chart">
+                    {% for reason, count in retirement_rows %}
+                        <div class="bar-row">
+                            <span class="bar-label">{{ reason.label }}</span>
+                            <span class="bar-track"><span class="bar-fill" style="width: {{ (count / retirement_max * 100) | round(1) }}%"></span></span>
+                            <span class="bar-value">{{ count }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-state">No hunts have been retired yet.</p>
+            {% endif %}
+        </section>
+
+        <section class="panel">
+            <h2>Recent activity</h2>
+            <p class="panel-hint">The 10 most recent runs, independent of the selected range.</p>
+            {% if recent_runs %}
+                <ul class="recent-activity-list">
+                    {% for run in recent_runs %}
+                        <li>
+                            <a href="/hunts/{{ run.hunt_id }}">{{ run.hunt.title }}</a>
+                            <span class="run-date">{{ run.ran_at.date() }}</span>
+                            <span class="badge badge-outcome">{{ run.outcome_label }}</span>
+                            {% if run.result_count is not none %}
+                                <span class="run-result-count">{{ run.result_count }} result{{ "s" if run.result_count != 1 else "" }}</span>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-state">No runs logged yet.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

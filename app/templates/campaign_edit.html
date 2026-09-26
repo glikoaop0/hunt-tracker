@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Edit {{ campaign.title }} &middot; Hunt Tracker</title>
+    <link rel="stylesheet" href="/static/themes/terminal-console.css">
+</head>
+<body>
+    {% set shell_context = "Edit campaign" %}
+    {% include "partials/topbar.html" %}
+    <main class="container-fluid">
+        <p class="page-breadcrumb"><a href="/campaigns/{{ campaign.id }}">&larr; {{ campaign.title }}</a></p>
+        <div class="form-page-header">
+            <h1>Edit campaign</h1>
+        </div>
+
+        {% if error %}
+            <p class="form-error" role="alert">{{ error }}</p>
+        {% endif %}
+
+        <div class="form-with-aside">
+            <form class="campaign-form panel" method="post" action="/campaigns/{{ campaign.id }}/edit">
+                {{ csrf_field() }}
+                <div class="field">
+                    <label for="edit-campaign-title">Title</label>
+                    <input type="text" id="edit-campaign-title" name="title" value="{{ values.title }}" required>
+                </div>
+
+                <div class="field">
+                    <label for="edit-campaign-objective">Objective</label>
+                    <textarea id="edit-campaign-objective" name="objective" rows="2" required>{{ values.objective }}</textarea>
+                </div>
+
+                <div class="field">
+                    <label for="edit-campaign-status">Status</label>
+                    <select id="edit-campaign-status" name="status" required>
+                        {% for option in ["planned", "active", "closed"] %}
+                            <option value="{{ option }}" {% if values.status == option %}selected{% endif %}>{{ option | capitalize }}</option>
+                        {% endfor %}
+                    </select>
+                    <p class="field-hint">Campaign status is independent of hunt status &mdash; closing a campaign never retires its linked hunts.</p>
+                </div>
+
+                <div class="field">
+                    <label for="edit-campaign-scope">Scope (optional)</label>
+                    <textarea id="edit-campaign-scope" name="scope" rows="3">{{ values.scope }}</textarea>
+                </div>
+
+                <div class="field">
+                    <label for="edit-campaign-notes">Investigation notes / references (optional)</label>
+                    <textarea id="edit-campaign-notes" name="notes" rows="3">{{ values.notes }}</textarea>
+                </div>
+
+                <div class="field">
+                    <label for="edit-campaign-conclusion">Conclusion and next steps (optional)</label>
+                    <textarea id="edit-campaign-conclusion" name="conclusion" rows="3">{{ values.conclusion }}</textarea>
+                    <p class="field-hint">Also editable directly from the campaign's Overview tab.</p>
+                </div>
+
+                <div class="form-actions">
+                    <a href="/campaigns/{{ campaign.id }}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+
+            <aside class="form-aside form-aside-sticky panel" aria-labelledby="edit-campaign-guide-title">
+                <h2 id="edit-campaign-guide-title">Good to know</h2>
+                <ul class="form-aside-steps form-aside-notes">
+                    <li>
+                        <strong>Linked hunts.</strong>
+                        Add or unlink hunts from the campaign page. Unlinking removes the hunt from this campaign only; the hunt and its runs are kept.
+                    </li>
+                    <li>
+                        <strong>Status.</strong>
+                        Planned, Active or Closed. Closing never retires linked hunts, and a closed campaign can be reopened at any time.
+                    </li>
+                    <li>
+                        <strong>Conclusion.</strong>
+                        Can also be written directly on the campaign's Overview tab, once hunts and runs give you something to conclude.
+                    </li>
+                    <li>
+                        <strong>Last activity.</strong>
+                        Saving here counts as campaign activity, alongside runs logged on linked hunts.
+                    </li>
+                </ul>
+            </aside>
+        </div>
+    </main>
+</body>
+</html>

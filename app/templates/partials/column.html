@@ -1,0 +1,23 @@
+{% set column_subtitles = {
+    "idea": "Untriaged hunting hypotheses",
+    "scoped": "Prepared for execution",
+    "active": "Recurring or in-progress hunts",
+    "retired": "Completed or discontinued hunts",
+} %}
+<section class="column" data-status="{{ status.value }}" id="column-{{ status.value }}">
+    <header class="column-header">
+        <div class="column-heading">
+            <h2>{{ status.value | capitalize }}</h2>
+            <span class="count" aria-label="{{ hunts | length }} hunts">{{ hunts | length }}</span>
+        </div>
+        <p class="column-subtitle">{{ column_subtitles[status.value] }}</p>
+    </header>
+    <div class="cards">
+        {% for hunt in hunts %}
+            {% include "partials/card.html" %}
+        {% else %}
+            <p class="column-empty">Drag a hunt here</p>
+        {% endfor %}
+        <p class="column-empty column-filtered-empty" hidden>No matching hunts.</p>
+    </div>
+</section>

@@ -1,0 +1,25 @@
+<a class="card-link" href="/hunts/{{ hunt.id }}" aria-label="{{ hunt.title }}, priority {{ hunt.priority }}{{ ', overdue' if hunt.is_overdue else '' }}">
+    <article class="card priority-{{ hunt.priority }}" data-hunt-id="{{ hunt.id }}" draggable="true"
+        data-priority="{{ hunt.priority }}"
+        data-overdue="{{ 'true' if hunt.is_overdue else 'false' }}"
+        data-search="{{ (hunt.title ~ ' ' ~ hunt.hypothesis ~ ' ' ~ hunt.data_sources ~ ' ' ~ hunt.attack_techniques) | lower }}"
+    >
+        <p class="card-title" title="{{ hunt.title }}">{{ hunt.title }}</p>
+        <p class="card-meta">
+            <span class="card-priority">Priority {{ hunt.priority }}</span>
+            <span>{{ hunt.technique_count }} technique{{ "s" if hunt.technique_count != 1 else "" }}</span>
+            <span>{{ hunt.run_count }} run{{ "s" if hunt.run_count != 1 else "" }}</span>
+        </p>
+        {% if hunt.status.value == "retired" %}
+            <p class="card-retirement">
+                Retired{% if hunt.retired_at %} on {{ hunt.retired_at.date() }}{% endif %}{% if hunt.retirement_reason %} &middot; {{ hunt.retirement_reason_label }}{% endif %}
+            </p>
+        {% elif hunt.next_run %}
+            <p class="card-meta card-meta-timing">
+                <span class="{{ 'overdue' if hunt.is_overdue else '' }}">
+                    {% if hunt.is_overdue %}&#9888; Overdue &mdash; was due {{ hunt.next_run }}{% else %}Next run {{ hunt.next_run }}{% endif %}
+                </span>
+            </p>
+        {% endif %}
+    </article>
+</a>

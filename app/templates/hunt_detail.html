@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{{ hunt.title }} &middot; Hunt Tracker</title>
+    <link rel="stylesheet" href="/static/themes/terminal-console.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="htmx-config" content='{"allowScriptTags": false, "allowEval": false}'>
+    <script src="/static/htmx.min.js"></script>
+    <script src="/static/csrf.js"></script>
+    <script src="/static/dragdrop.js"></script>
+    <script src="/static/copy-query.js"></script>
+    <script src="/static/role-button.js"></script>
+    <script src="/static/lifecycle.js"></script>
+</head>
+<body>
+    {% set shell_context = "Hunt detail" %}
+    {% include "partials/topbar.html" %}
+    <main class="container-fluid">
+        {% include "partials/hunt_main.html" %}
+        <div id="retire-dialog-root"></div>
+    </main>
+</body>
+</html>

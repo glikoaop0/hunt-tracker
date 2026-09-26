@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Export &middot; Hunt Tracker</title>
+    <link rel="stylesheet" href="/static/themes/terminal-console.css">
+</head>
+<body>
+    {% set shell_context = "Export" %}
+    {% include "partials/topbar.html" %}
+    <main class="container-fluid">
+        <p class="page-breadcrumb"><a href="/">&larr; Board</a></p>
+        <div class="form-page-header">
+            <h1>Export &amp; backup</h1>
+            <p class="panel-hint">Everything here is local and read-only; nothing sends data anywhere, and nothing here can restore or overwrite your database from the browser.</p>
+        </div>
+
+        <section class="panel export-panel">
+            <h2>Complete JSON export</h2>
+            <p class="prose">
+                A single JSON file containing every Hunt, Run and Exclusion, including retirement
+                information and each Run's query snapshot. Intended as a backup and reference format.
+                
+            </p>
+            <a href="/export/json" class="btn btn-secondary">Download complete JSON</a>
+        </section>
+
+        <section class="panel export-panel">
+            <h2>Database backup</h2>
+            <p class="prose">
+                A consistent point-in-time copy of the underlying SQLite database, taken with
+                SQLite's own backup mechanism so it's safe even if the app is running. This is the
+                most complete backup available; use it if you want a copy you could restore
+                from later.
+            </p>
+            <p class="prose">
+                <strong>To restore manually:</strong> stop the application first. Make an additional
+                copy of your current <code>hunts.db</code> before doing anything else, in case you
+                need to go back. Then replace <code>hunts.db</code> in the project directory with the
+                downloaded backup file (renamed to <code>hunts.db</code>), and start the application
+                again. There is no restore option in the browser; this is a deliberate
+                safeguard against overwriting your data by accident.
+            </p>
+            <a href="/export/backup" class="btn btn-secondary">Download database backup</a>
+        </section>
+
+        
+    </main>
+</body>
+</html>

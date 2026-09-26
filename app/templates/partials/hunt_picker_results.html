@@ -1,0 +1,18 @@
+{% if not hunt_picker_query %}
+    <p class="hunt-picker-row-meta">Type at least one character to search all hunts by title.</p>
+{% elif results %}
+    {% for hunt in results %}
+        <div class="hunt-picker-row">
+            <div>
+                <span class="hunt-picker-row-title">{{ hunt.title }}</span>
+                <span class="hunt-picker-row-meta">&middot; {{ hunt.status.value | capitalize }}</span>
+            </div>
+            <form hx-post="/campaigns/{{ campaign.id }}/hunts" hx-target="#campaign-overview" hx-swap="outerHTML">
+                <input type="hidden" name="hunt_id" value="{{ hunt.id }}">
+                <button type="submit" class="btn btn-secondary btn-small">Link</button>
+            </form>
+        </div>
+    {% endfor %}
+{% else %}
+    <p class="hunt-picker-row-meta">No unlinked hunts match &ldquo;{{ hunt_picker_query }}&rdquo;.</p>
+{% endif %}

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>New campaign &middot; Hunt Tracker</title>
+    <link rel="stylesheet" href="/static/themes/terminal-console.css">
+</head>
+<body>
+    {% set shell_context = "New campaign" %}
+    {% include "partials/topbar.html" %}
+    <main class="container-fluid">
+        <p class="page-breadcrumb"><a href="/campaigns">&larr; Campaigns</a></p>
+        <div class="form-page-header">
+            <h1>New campaign</h1>
+            <p class="panel-hint">Group related hunts around one investigation objective. You can link hunts after creating it.</p>
+        </div>
+
+        {% if error %}
+            <p class="form-error" role="alert">{{ error }}</p>
+        {% endif %}
+
+        <div class="form-with-aside">
+            <form class="campaign-form panel" method="post" action="/campaigns">
+                {{ csrf_field() }}
+                <div class="field">
+                    <label for="campaign-title">Title</label>
+                    <input type="text" id="campaign-title" name="title" value="{{ values.title }}" required>
+                </div>
+
+                <div class="field">
+                    <label for="campaign-objective">Objective</label>
+                    <textarea id="campaign-objective" name="objective" rows="2" required>{{ values.objective }}</textarea>
+                    <p class="field-hint">What are we investigating? One or two sentences is enough.</p>
+                </div>
+
+                <div class="field">
+                    <label for="campaign-scope">Scope (optional)</label>
+                    <textarea id="campaign-scope" name="scope" rows="3">{{ values.scope }}</textarea>
+                    <p class="field-hint">What's in and out of bounds for this investigation. Markdown supported.</p>
+                </div>
+
+                <div class="field">
+                    <label for="campaign-notes">Investigation notes / references (optional)</label>
+                    <textarea id="campaign-notes" name="notes" rows="3">{{ values.notes }}</textarea>
+                    <p class="field-hint">Background, links, related tickets. Markdown supported.</p>
+                </div>
+
+                <div class="field">
+                    <label for="campaign-conclusion">Conclusion and next steps (optional)</label>
+                    <textarea id="campaign-conclusion" name="conclusion" rows="3">{{ values.conclusion }}</textarea>
+                    <p class="field-hint">Usually filled in later, once the campaign has hunts and runs to draw on.</p>
+                </div>
+
+                <div class="form-actions">
+                    <a href="/campaigns" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Create campaign</button>
+                </div>
+            </form>
+
+            <aside class="form-aside panel" aria-labelledby="campaign-guide-title">
+                <h2 id="campaign-guide-title">How campaigns work</h2>
+                <ol class="form-aside-steps">
+                    <li>
+                        <strong>State the objective.</strong>
+                        Phrase it as the question the campaign should answer, e.g. <em>"Is there evidence of unauthorised persistence on Linux servers?"</em>
+                    </li>
+                    <li>
+                        <strong>Link hunts.</strong>
+                        After creating the campaign, add existing hunts from its page. A hunt can belong to several campaigns.
+                    </li>
+                    <li>
+                        <strong>Run and track.</strong>
+                        Runs logged on linked hunts appear in the campaign's Activity tab and status overview.
+                    </li>
+                    <li>
+                        <strong>Conclude.</strong>
+                        Write the conclusion and close the campaign. It can be reopened at any time.
+                    </li>
+                </ol>
+            </aside>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Campaigns &middot; Hunt Tracker</title>
+    <link rel="stylesheet" href="/static/themes/terminal-console.css">
+</head>
+<body>
+    {% set shell_context = "Campaigns" %}
+    {% include "partials/topbar.html" %}
+    <main class="container-fluid">
+        <div class="campaign-list-header">
+            <div>
+                <h1>Campaigns</h1>
+                <p class="board-subtitle">Group related hunts around one investigation objective</p>
+            </div>
+            <a href="/campaigns/new" class="btn btn-primary">New campaign</a>
+        </div>
+
+        {% if rows %}
+            {% for group_status in ["active", "planned", "closed"] %}
+                {% set group_rows = rows | selectattr("campaign.status.value", "equalto", group_status) | list %}
+                {% if group_rows %}
+                    <section class="campaign-group">
+                        <h2 class="campaign-group-title">{{ group_status | capitalize }} <span class="campaign-group-count">{{ group_rows | length }}</span></h2>
+                        <div class="campaign-rows">
+                            {% for row in group_rows %}
+                                <a href="/campaigns/{{ row.campaign.id }}" class="campaign-row-link">
+                                    <article class="campaign-row">
+                                        <div class="campaign-row-main">
+                                            <h3 class="campaign-row-title">{{ row.campaign.title }}</h3>
+                                            <p class="campaign-row-objective">{{ row.objective_preview }}</p>
+                                        </div>
+                                        <dl class="campaign-row-stats">
+                                            <div><dt>Hunts</dt><dd>{{ row.linked_hunt_count }}</dd></div>
+                                            <div><dt>Runs</dt><dd>{{ row.run_count }}</dd></div>
+                                            <div><dt>Last activity</dt><dd>{{ row.last_activity.date() if row.last_activity else "&mdash;" | safe }}</dd></div>
+                                        </dl>
+                                        <div class="campaign-row-distribution">
+                                            {% if row.linked_hunt_count %}
+                                                <div class="status-distribution-track" role="img" aria-label="Hunt status distribution: {% for status, count in row.status_distribution %}{{ status.value }} {{ count }}{% if not loop.last %}, {% endif %}{% endfor %}">
+                                                    {% for status, count in row.status_distribution %}
+                                                        {% if count > 0 %}
+                                                            <span class="status-distribution-segment" data-status="{{ status.value }}" style="width: {{ (count / row.linked_hunt_count * 100) | round(1) }}%"></span>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                                <p class="campaign-row-distribution-text">
+                                                    {% for status, count in row.status_distribution if count > 0 %}{{ count }} {{ status.value }}{% if not loop.last %} &middot; {% endif %}{% endfor %}
+                                                </p>
+                                            {% else %}
+                                                <p class="campaign-row-distribution-text">No hunts linked yet</p>
+                                            {% endif %}
+                                        </div>
+                                    </article>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </section>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <p class="empty-state">No campaigns yet. A campaign groups related hunts around one investigation objective &mdash; create one when you're pulling several hunts together toward a single question.</p>
+        {% endif %}
+    </main>
+</body>
+</html>

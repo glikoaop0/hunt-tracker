@@ -1,0 +1,127 @@
+<div class="detail-layout" id="campaign-overview">
+    <div class="detail-main">
+        <div class="summary-strip">
+            <div class="summary-stat">
+                <span class="summary-value">{{ overview.total_linked_hunts }}</span>
+                <span class="summary-label">Linked hunts</span>
+            </div>
+            <div class="summary-stat">
+                <span class="summary-value">{{ overview.active_hunts }}</span>
+                <span class="summary-label">Currently active</span>
+            </div>
+            <div class="summary-stat">
+                <span class="summary-value">{{ overview.hunts_with_findings }}</span>
+                <span class="summary-label">Hunts with a Findings run</span>
+            </div>
+        </div>
+        <p class="activity-scope-note">"Hunts with a Findings run" counts linked hunts that have at least one run logged with the <strong>Findings</strong> outcome; that is a recorded outcome on a hunt run, not an automatically confirmed incident. Review the underlying runs before treating it as a conclusion.</p>
+
+        {% if overview.total_linked_hunts > 0 %}
+            <section class="panel">
+                <h2>Hunt status distribution</h2>
+                <p class="panel-hint">How linked hunts are currently spread across the board. This reflects lifecycle status only; it does not imply the investigation is complete.</p>
+                <div class="status-distribution">
+                    <div class="status-distribution-track" role="img" aria-label="Hunt status distribution: {% for status, count in overview.status_distribution %}{{ status.value }} {{ count }}{% if not loop.last %}, {% endif %}{% endfor %}">
+                        {% for status, count in overview.status_distribution %}
+                            {% if count > 0 %}
+                                <span class="status-distribution-segment" data-status="{{ status.value }}" style="width: {{ (count / overview.total_linked_hunts * 100) | round(1) }}%"></span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="status-distribution-legend">
+                        {% for status, count in overview.status_distribution %}
+                            <span><span class="swatch" data-status="{{ status.value }}"></span>{{ status.value | capitalize }} ({{ count }})</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+
+        <section class="panel">
+            <h2>Linked hunts</h2>
+            {% if overview.hunt_cards %}
+                <div class="linked-hunt-grid">
+                    {% for card in overview.hunt_cards %}
+                        <article class="linked-hunt-card">
+                            <a href="/hunts/{{ card.hunt.id }}" class="linked-hunt-card-link">
+                                <p class="linked-hunt-card-title">{{ card.hunt.title }}</p>
+                                <p class="linked-hunt-card-hypothesis">{{ card.hunt.hypothesis }}</p>
+                                <div class="linked-hunt-card-meta">
+                                    <span class="badge badge-status-{{ card.hunt.status.value }}">{{ card.hunt.status.value | capitalize }}</span>
+                                    {% if card.latest_run %}
+                                        <span class="linked-hunt-card-latest">{{ card.latest_run.ran_at.date() }} &middot; {{ card.latest_run.outcome_label }}</span>
+                                    {% else %}
+                                        <span class="linked-hunt-card-latest">No runs yet</span>
+                                    {% endif %}
+                                </div>
+                            </a>
+                            <form
+                                class="linked-hunt-card-unlink"
+                                hx-post="/campaigns/{{ campaign.id }}/hunts/{{ card.hunt.id }}/unlink"
+                                hx-target="#campaign-overview"
+                                hx-swap="outerHTML"
+                            >
+                                <button type="submit" class="btn btn-secondary btn-small">Unlink</button>
+                            </form>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-state">No hunts linked yet. Use the picker below to connect existing hunts to this investigation.</p>
+            {% endif %}
+        </section>
+
+        <section class="panel">
+            <h2>Link a hunt</h2>
+            <p class="panel-hint">Search existing hunts by title. Linking never duplicates or modifies the hunt.</p>
+            <div class="hunt-picker" id="hunt-picker">
+                <label for="hunt-picker-search">Search hunts</label>
+                <input
+                    type="search"
+                    id="hunt-picker-search"
+                    placeholder="Start typing a hunt title&hellip;"
+                    value="{{ hunt_picker_query }}"
+                    hx-get="/campaigns/{{ campaign.id }}/hunt-picker"
+                    hx-trigger="input changed delay:250ms, focus"
+                    hx-target="#hunt-picker-results"
+                    hx-swap="innerHTML"
+                    name="q"
+                    aria-label="Search hunts to link"
+                >
+                <div id="hunt-picker-results" class="hunt-picker-results"></div>
+            </div>
+        </section>
+    </div>
+
+    <aside class="detail-sidebar">
+        <section class="panel">
+            <h2>Scope</h2>
+            {% if campaign.scope %}
+                <div class="prose markdown-body">{{ campaign.scope | markdown }}</div>
+            {% else %}
+                <p class="empty-state">No scope recorded yet.</p>
+            {% endif %}
+        </section>
+
+        <section class="panel">
+            <h2>Investigation notes &amp; references</h2>
+            {% if campaign.notes %}
+                <div class="prose markdown-body">{{ campaign.notes | markdown }}</div>
+            {% else %}
+                <p class="empty-state">No notes recorded yet.</p>
+            {% endif %}
+        </section>
+
+        <section class="panel">
+            <h2>Conclusion &amp; next steps</h2>
+            <p class="panel-hint">What have we learned, and what should happen next? Editable at any time, independent of campaign status.</p>
+            <form class="inline-save-form" hx-post="/campaigns/{{ campaign.id }}/conclusion" hx-target="#campaign-overview" hx-swap="outerHTML">
+                <div class="field">
+                    <label for="campaign-conclusion">Conclusion and next steps</label>
+                    <textarea id="campaign-conclusion" name="conclusion" rows="6" placeholder="What have we learned? What should happen next? (markdown supported)">{{ campaign.conclusion }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-secondary btn-small">Save</button>
+            </form>
+        </section>
+    </aside>
+</div>

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Delete {{ hunt.title }} &middot; Hunt Tracker</title>
+    <link rel="stylesheet" href="/static/themes/terminal-console.css">
+</head>
+<body>
+    {% set shell_context = "Delete hunt" %}
+    {% include "partials/topbar.html" %}
+    <main class="container-fluid">
+        <p class="page-breadcrumb"><a href="/hunts/{{ hunt.id }}/edit">&larr; Edit hunt</a></p>
+        <div class="form-page-header">
+            <h1>Delete hunt</h1>
+        </div>
+
+        <section class="panel danger-panel delete-confirm" aria-labelledby="delete-summary-title">
+            <h2 id="delete-summary-title">&ldquo;{{ hunt.title }}&rdquo;</h2>
+            <p>This permanently deletes:</p>
+            <ul class="delete-list">
+                <li>the hunt itself &mdash; hypothesis, query, notes and schedule</li>
+                <li>{{ hunt.runs | length }} logged run{{ "s" if hunt.runs | length != 1 else "" }}, with their query snapshots</li>
+                <li>{{ hunt.exclusions | length }} exclusion{{ "s" if hunt.exclusions | length != 1 else "" }}, active and deactivated</li>
+                {% if hunt.campaigns %}
+                    <li>
+                        its link{{ "s" if hunt.campaigns | length != 1 else "" }} to
+                        {% for campaign in hunt.campaigns %}<a href="/campaigns/{{ campaign.id }}">{{ campaign.title }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
+                        &mdash; the campaign{{ "s stay" if hunt.campaigns | length != 1 else " stays" }}
+                    </li>
+                {% endif %}
+            </ul>
+            <p class="delete-warning"><strong>This cannot be undone.</strong>
+                To keep the history, <a href="/hunts/{{ hunt.id }}">retire the hunt</a> instead,
+                or <a href="/export/backup">download a backup</a> first.</p>
+
+            {% if error %}
+                <p class="form-error" role="alert">{{ error }}</p>
+            {% endif %}
+
+            <form method="post" action="/hunts/{{ hunt.id }}/delete" class="delete-form">
+                {{ csrf_field() }}
+                <div class="field">
+                    <label for="delete-confirmation">Type <strong>{{ confirmation_word }}</strong> to confirm</label>
+                    <input type="text" id="delete-confirmation" name="confirmation" required autocomplete="off"
+                        spellcheck="false" pattern="[Dd][Ee][Ll][Ee][Tt][Ee]" title="Type {{ confirmation_word }}"
+                        {% if error %}autofocus{% endif %}>
+                </div>
+                <div class="form-actions">
+                    <a href="/hunts/{{ hunt.id }}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-danger">Delete permanently</button>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

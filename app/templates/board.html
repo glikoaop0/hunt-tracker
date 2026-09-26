@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Hunt Tracker</title>
+    <link rel="stylesheet" href="/static/themes/terminal-console.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="htmx-config" content='{"allowScriptTags": false, "allowEval": false}'>
+    <script src="/static/htmx.min.js"></script>
+    <script src="/static/csrf.js"></script>
+    <script src="/static/dragdrop.js"></script>
+    <script src="/static/filter.js"></script>
+    <script src="/static/lifecycle.js"></script>
+</head>
+<body>
+    {% include "partials/topbar.html" %}
+    <main class="container-fluid">
+        <div class="board-header">
+            <div class="board-header-text">
+                <h1>Hunt Tracker</h1>
+                <p class="board-subtitle">Threat-hunting lifecycle</p>
+            </div>
+            <a href="/hunts/new" class="btn btn-primary board-new-hunt">New hunt</a>
+        </div>
+
+        {% if deleted_title %}
+            <p class="board-notice" role="status">Deleted &ldquo;{{ deleted_title }}&rdquo;.</p>
+        {% endif %}
+
+        {% include "partials/summary_strip.html" %}
+
+        <div class="filter-bar" id="filter-bar">
+            <div class="field">
+                <label for="filter-search">Search</label>
+                <input type="search" id="filter-search" placeholder="Title, hypothesis, data sources, ATT&amp;CK&hellip;">
+            </div>
+            <div class="field field-narrow">
+                <label for="filter-priority">Priority</label>
+                <select id="filter-priority">
+                    <option value="">All priorities</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+            <div class="field field-checkbox">
+                <label for="filter-overdue"><input type="checkbox" id="filter-overdue"> Overdue only</label>
+            </div>
+            <button type="button" id="filter-clear" class="btn btn-secondary">Clear filters</button>
+            <p id="filter-status" class="filter-status" aria-live="polite"></p>
+            <p class="board-hint">
+                <svg class="board-hint-icon" viewBox="0 0 10 16" width="8" height="13" aria-hidden="true" focusable="false">
+                    <circle cx="2" cy="2" r="1.5"/><circle cx="8" cy="2" r="1.5"/>
+                    <circle cx="2" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/>
+                    <circle cx="2" cy="14" r="1.5"/><circle cx="8" cy="14" r="1.5"/>
+                </svg>
+                Drag cards between columns to change their stage
+            </p>
+        </div>
+
+        <div class="board" id="board">
+            {% include "partials/board_columns.html" %}
+        </div>
+        <div id="retire-dialog-root"></div>
+    </main>
+</body>
+</html>

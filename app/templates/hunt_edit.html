@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Edit {{ hunt_title }} &middot; Hunt Tracker</title>
+    <link rel="stylesheet" href="/static/themes/terminal-console.css">
+</head>
+<body>
+    {% set shell_context = "Edit hunt" %}
+    {% include "partials/topbar.html" %}
+    <main class="container-fluid">
+        <p class="page-breadcrumb"><a href="/hunts/{{ hunt_id }}">&larr; {{ hunt_title }}</a></p>
+        <div class="form-page-header">
+            <h1>Edit hunt</h1>
+        </div>
+
+        {% if error %}
+            <p class="form-error" role="alert">{{ error }}</p>
+        {% endif %}
+
+        <div class="form-with-aside">
+            <div class="form-column">
+            <form class="hunt-form panel" method="post" action="/hunts/{{ hunt_id }}/edit">
+                {{ csrf_field() }}
+                <h2>Definition</h2>
+
+                <div class="field">
+                    <label for="edit-title">Title</label>
+                    <input type="text" id="edit-title" name="title" value="{{ values.title }}" required>
+                </div>
+
+                <div class="field">
+                    <label for="edit-hypothesis">Hypothesis</label>
+                    <textarea id="edit-hypothesis" name="hypothesis" rows="3" required>{{ values.hypothesis }}</textarea>
+                </div>
+
+                <div class="field">
+                    <label for="edit-priority">Priority</label>
+                    <select id="edit-priority" name="priority" required>
+                        <option value="" disabled {% if not values.priority %}selected{% endif %}>Choose priority&hellip;</option>
+                        {% for value in range(1, 6) %}
+                            <option value="{{ value }}" {% if values.priority == value|string %}selected{% endif %}>{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <h2>Hunting scope</h2>
+
+                <div class="field">
+                    <label for="edit-data-sources">Data sources</label>
+                    <input type="text" id="edit-data-sources" name="data_sources" value="{{ values.data_sources }}">
+                    <p class="field-hint">Comma-separated free text, e.g. "Splunk, S1 Deep Visibility".</p>
+                </div>
+
+                <div class="field">
+                    <label for="edit-attack-techniques">ATT&amp;CK techniques</label>
+                    <input type="text" id="edit-attack-techniques" name="attack_techniques" value="{{ values.attack_techniques }}">
+                    <p class="field-hint">Comma-separated technique IDs, e.g. "T1059.001, T1218".</p>
+                </div>
+
+                <div class="field">
+                    <label for="edit-query">Query</label>
+                    <textarea id="edit-query" name="query" rows="6" class="query-block">{{ values.query }}</textarea>
+                </div>
+
+                <div class="field">
+                    <label for="edit-notes">Notes</label>
+                    <textarea id="edit-notes" name="notes" rows="4">{{ values.notes }}</textarea>
+                    <p class="field-hint">Markdown supported. Shown on the hunt's detail page.</p>
+                </div>
+
+                <h2>Scheduling</h2>
+
+                <div class="field">
+                    <label for="edit-cadence-days">Cadence (days)</label>
+                    <input type="number" id="edit-cadence-days" name="cadence_days" min="1" value="{{ values.cadence_days }}">
+                    <p class="field-hint">How often this hunt should recur. Leave blank for a one-off hunt &mdash; clearing this also clears the next run date below.</p>
+                </div>
+
+                <div class="field">
+                    <label for="edit-next-run">Next run</label>
+                    <input type="date" id="edit-next-run" name="next_run" value="{{ values.next_run }}">
+                    <p class="field-hint">Only takes effect while a cadence is set above. Logging a run advances this automatically.</p>
+                </div>
+
+                <div class="form-actions">
+                    <a href="/hunts/{{ hunt_id }}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+
+            <section class="panel danger-panel danger-zone" aria-labelledby="danger-zone-title">
+                <div>
+                    <h2 id="danger-zone-title">Delete this hunt</h2>
+                    <p class="field-hint">Permanently removes the hunt with its runs and exclusions. You'll be asked to confirm.</p>
+                </div>
+                <a href="/hunts/{{ hunt_id }}/delete" class="btn btn-danger-outline">Delete hunt&hellip;</a>
+            </section>
+            </div>
+
+            <aside class="form-aside form-aside-sticky panel" aria-labelledby="edit-guide-title">
+                <h2 id="edit-guide-title">Good to know</h2>
+                <ul class="form-aside-steps form-aside-notes">
+                    <li>
+                        <strong>Past runs are safe.</strong>
+                        Each run keeps a snapshot of the query it used, so editing the query here does not rewrite run history.
+                    </li>
+                    <li>
+                        <strong>Scheduling.</strong>
+                        Logging a run moves the next run forward by the cadence. Clearing the cadence makes the hunt one-off and clears the next run date.
+                    </li>
+                    <li>
+                        <strong>Status and retirement.</strong>
+                        These are changed with the stage buttons on the hunt page, or by dragging the card on the board. Retiring asks for a reason.
+                    </li>
+                    <li>
+                        <strong>Exclusions.</strong>
+                        Add or deactivate them on the hunt page, below the run history.
+                    </li>
+                </ul>
+            </aside>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,43 @@
+{% set expanded = expanded | default(false) %}
+<div class="run-row" id="run-{{ run.id }}">
+    {% if expanded %}
+        <p class="run-summary-line">
+            <span class="run-date">{{ run.ran_at.date() }}</span>
+            <span class="badge badge-outcome">{{ run.outcome_label }}</span>
+            {% if run.duration_minutes %}
+                <span class="run-duration">{{ run.duration_minutes }} min</span>
+            {% endif %}
+            {% if run.has_search_window %}
+                <span class="run-window">{{ run.search_from.strftime('%Y-%m-%d %H:%M') }} &rarr; {{ run.search_to.strftime('%Y-%m-%d %H:%M') }}</span>
+            {% endif %}
+            {% if run.result_count is not none %}
+                <span class="run-result-count">{{ run.result_count }} result{{ "s" if run.result_count != 1 else "" }}</span>
+            {% endif %}
+            <a href="#" class="run-toggle" hx-get="/hunts/{{ hunt.id }}/runs/{{ run.id }}/row?expanded=false" hx-target="#run-{{ run.id }}" hx-swap="outerHTML" aria-expanded="true" aria-controls="run-{{ run.id }}">Collapse</a>
+        </p>
+        <div class="run-notes prose">{{ run.notes | markdown }}</div>
+        <div class="run-snapshot">
+            <p class="run-snapshot-label">Query snapshot <span class="run-snapshot-immutable">&mdash; captured at execution, immutable</span></p>
+            {% if run.query_snapshot %}
+                <pre class="query-block run-snapshot-block"><code>{{ run.query_snapshot }}</code></pre>
+            {% else %}
+                <p class="empty-state">{{ run.query_snapshot_label }}.</p>
+            {% endif %}
+        </div>
+    {% else %}
+        <p class="run-summary-line run-collapsed" tabindex="0" role="button" aria-expanded="false" aria-controls="run-{{ run.id }}" hx-get="/hunts/{{ hunt.id }}/runs/{{ run.id }}/row?expanded=true" hx-trigger="click" hx-target="#run-{{ run.id }}" hx-swap="outerHTML">
+            <span class="run-date">{{ run.ran_at.date() }}</span>
+            <span class="badge badge-outcome">{{ run.outcome_label }}</span>
+            {% if run.duration_minutes %}
+                <span class="run-duration">{{ run.duration_minutes }} min</span>
+            {% endif %}
+            {% if run.has_search_window %}
+                <span class="run-window">{{ run.search_from.strftime('%Y-%m-%d %H:%M') }} &rarr; {{ run.search_to.strftime('%Y-%m-%d %H:%M') }}</span>
+            {% endif %}
+            {% if run.result_count is not none %}
+                <span class="run-result-count">{{ run.result_count }} result{{ "s" if run.result_count != 1 else "" }}</span>
+            {% endif %}
+            <span class="run-note-preview">{{ run.notes.splitlines()[0] if run.notes else "" }}</span>
+        </p>
+    {% endif %}
+</div>

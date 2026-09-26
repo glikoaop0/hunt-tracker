@@ -1,0 +1,30 @@
+<div class="dialog-overlay">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="retire-dialog-title" data-hunt-id="{{ hunt.id }}">
+        <h2 id="retire-dialog-title">Retire &ldquo;{{ hunt.title }}&rdquo;</h2>
+        <p class="dialog-hint">This moves the hunt to Retired. A reason is required so the rationale isn't lost.</p>
+        {% if context == "detail" %}
+        <form hx-post="/hunts/{{ hunt.id }}/retire" hx-target="#hunt-main" hx-swap="outerHTML">
+        {% else %}
+        <form hx-post="/hunts/{{ hunt.id }}/retire" hx-target="#board" hx-swap="innerHTML">
+        {% endif %}
+            <input type="hidden" name="context" value="{{ context }}">
+            <div class="field">
+                <label for="retirement-reason">Reason</label>
+                <select name="reason" id="retirement-reason" required aria-label="Retirement reason">
+                    <option value="" disabled selected>Choose a reason&hellip;</option>
+                    {% for reason in retirement_reasons %}
+                        <option value="{{ reason.value }}">{{ reason.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="retirement-note">Note (optional)</label>
+                <textarea name="note" id="retirement-note" rows="3" placeholder="Optional context (markdown)" aria-label="Retirement note"></textarea>
+            </div>
+            <div class="dialog-actions">
+                <button type="button" class="btn btn-secondary dialog-cancel">Cancel</button>
+                <button type="submit" class="btn btn-retire">Retire</button>
+            </div>
+        </form>
+    </div>
+</div>

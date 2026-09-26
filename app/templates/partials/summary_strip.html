@@ -1,0 +1,29 @@
+{% set oob = oob | default(false) %}
+{% set stats = namespace(total=0, active=0, retired=0, overdue=0) %}
+{% for status, hunts in columns %}
+    {% set stats.total = stats.total + hunts | length %}
+    {% if status.value == "active" %}{% set stats.active = hunts | length %}{% endif %}
+    {% if status.value == "retired" %}{% set stats.retired = hunts | length %}{% endif %}
+    {% for hunt in hunts %}
+        {% if hunt.is_overdue %}{% set stats.overdue = stats.overdue + 1 %}{% endif %}
+    {% endfor %}
+{% endfor %}
+
+<div class="summary-strip" id="summary-strip" {% if oob %}hx-swap-oob="true"{% endif %}>
+    <div class="summary-stat">
+        <span class="summary-value">{{ stats.total }}</span>
+        <span class="summary-label">Total hunts</span>
+    </div>
+    <div class="summary-stat">
+        <span class="summary-value">{{ stats.active }}</span>
+        <span class="summary-label">Active</span>
+    </div>
+    <div class="summary-stat summary-stat-overdue">
+        <span class="summary-value">{{ stats.overdue }}</span>
+        <span class="summary-label">Overdue</span>
+    </div>
+    <div class="summary-stat">
+        <span class="summary-value">{{ stats.retired }}</span>
+        <span class="summary-label">Retired</span>
+    </div>
+</div>

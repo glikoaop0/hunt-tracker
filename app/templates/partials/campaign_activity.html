@@ -1,0 +1,23 @@
+<section class="panel">
+    <h2>Activity</h2>
+    <p class="activity-scope-note">This is run activity aggregated from hunts <strong>currently</strong> linked to this campaign, newest first &mdash; it is not a complete audit log and does not include past membership changes, status changes, or activity from hunts that have since been unlinked.</p>
+
+    {% if activity %}
+        <div class="activity-timeline">
+            {% for entry in activity %}
+                <div class="activity-entry">
+                    <p class="activity-entry-line">
+                        <span class="run-date">{{ entry.run.ran_at.date() }}</span>
+                        <a href="/hunts/{{ entry.hunt.id }}" class="activity-entry-hunt">{{ entry.hunt.title }}</a>
+                        <span class="badge badge-outcome">{{ entry.run.outcome_label }}</span>
+                    </p>
+                    {% if entry.run.notes %}
+                        <p class="activity-entry-note">{{ entry.run.notes.splitlines()[0] }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty-state">No runs logged yet against this campaign's linked hunts.</p>
+    {% endif %}
+</section>

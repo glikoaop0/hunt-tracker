@@ -1,0 +1,267 @@
+{% macro lifecycle_button(hunt, action, class_name, forward_arrow=false) -%}
+    {% if action.kind == "move" %}
+        <button type="button" class="{{ class_name }}" hx-post="/hunts/{{ hunt.id }}/move" hx-vals='{"status": "{{ action.status.value }}"}' hx-target="#hunt-main" hx-swap="outerHTML">{{ action.label }}{% if forward_arrow %} <span aria-hidden="true">&rarr;</span>{% endif %}</button>
+    {% elif action.kind == "retire" %}
+        <button type="button" class="{{ class_name }}" hx-get="/hunts/{{ hunt.id }}/retire-dialog?context=detail" hx-target="#retire-dialog-root" hx-swap="innerHTML" aria-haspopup="dialog">{{ action.label }}</button>
+    {% else %}
+        <button type="button" class="{{ class_name }}" hx-post="/hunts/{{ hunt.id }}/reactivate" hx-target="#hunt-main" hx-swap="outerHTML">{{ action.label }}</button>
+    {% endif %}
+{%- endmacro %}
+{% set lifecycle = lifecycle_view(hunt) %}
+<div id="hunt-main">
+    <div class="detail-header">
+        <p class="detail-breadcrumb"><a href="/">&larr; Board</a></p>
+        <div class="detail-heading-row">
+            <h1>{{ hunt.title }}</h1>
+            <div class="detail-actions">
+                <a href="/hunts/{{ hunt.id }}/export/markdown" class="btn btn-secondary">Export Markdown</a>
+                <a href="/hunts/{{ hunt.id }}/edit" class="btn btn-secondary detail-edit-link">Edit hunt</a>
+            </div>
+        </div>
+        <div class="lifecycle" id="lifecycle" tabindex="-1">
+            <ol class="lifecycle-stepper" aria-label="Lifecycle stage">
+                {% for stage in lifecycle.stages %}
+                    <li class="lifecycle-step lifecycle-step-{{ stage.state }}"{% if stage.state == "current" %} aria-current="step"{% endif %}><span class="lifecycle-step-label">{{ stage.label }}</span></li>
+                {% endfor %}
+            </ol>
+            <div class="lifecycle-actions">
+                {{ lifecycle_button(hunt, lifecycle.primary, "btn btn-primary lifecycle-primary", forward_arrow=true) }}
+                {% if lifecycle.others %}
+                    <details class="menu">
+                        <summary class="btn btn-secondary menu-toggle" aria-label="More lifecycle actions" title="More lifecycle actions"><span aria-hidden="true">&ctdot;</span></summary>
+                        <div class="menu-panel">
+                            {% for action in lifecycle.others %}
+                                {{ lifecycle_button(hunt, action, "menu-item") }}
+                            {% endfor %}
+                        </div>
+                    </details>
+                {% endif %}
+            </div>
+        </div>
+        <div class="detail-badges">
+            <span class="badge badge-status badge-status-{{ hunt.status.value }}">{{ hunt.status.value | capitalize }}</span>
+            <span class="badge badge-priority priority-{{ hunt.priority }}">Priority {{ hunt.priority }}</span>
+            {% if hunt.is_overdue %}
+                <span class="badge badge-overdue">&#9888; Overdue</span>
+            {% endif %}
+            <span class="detail-run-count">{{ hunt.run_count }} run{{ "s" if hunt.run_count != 1 else "" }}</span>
+        </div>
+        {% if hunt.status.value == "retired" %}
+            <div class="retired-banner" role="status">
+                <span>Retired: <strong>{{ hunt.retirement_reason_label }}</strong></span>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="detail-layout">
+        <div class="detail-main">
+            <section class="panel">
+                <h2>Hypothesis</h2>
+                <p class="prose">{{ hunt.hypothesis }}</p>
+            </section>
+
+            {% if hunt.notes %}
+                <section class="panel">
+                    <h2>Notes</h2>
+                    <div class="prose markdown-body">{{ hunt.notes | markdown }}</div>
+                </section>
+            {% endif %}
+
+            <section class="panel">
+                <div class="query-heading-row">
+                    <h2>Query</h2>
+                    {% if hunt.query %}
+                        <button type="button" class="btn-copy" data-copy-target="hunt-query-text" aria-label="Copy query to clipboard">Copy</button>
+                    {% endif %}
+                </div>
+                {% if hunt.query %}
+                    <pre class="query-block" id="hunt-query-text"><code>{{ hunt.query }}</code></pre>
+                {% else %}
+                    <p class="empty-state">No query recorded yet. <a href="/hunts/{{ hunt.id }}/edit">Add one</a>.</p>
+                {% endif %}
+            </section>
+
+            {% set is_retired = hunt.status.value == "retired" %}
+            {% set run_form_error = run_form_error | default(None) %}
+            {% set run_form_values = run_form_values | default({}) %}
+            {% if not is_retired %}
+            <section class="panel">
+                <h2>Log a run</h2>
+                <p class="panel-hint">Record the outcome of executing this hunt's query, including the exact window searched.</p>
+                {% if run_form_error %}
+                    <p class="form-error" role="alert">{{ run_form_error }}</p>
+                {% endif %}
+                <form hx-post="/hunts/{{ hunt.id }}/runs" hx-target="#hunt-main" hx-swap="outerHTML" class="run-form">
+                    <div class="log-run-fields">
+                        <div class="field">
+                            <label for="run-outcome">Outcome</label>
+                            <select name="outcome" id="run-outcome" required aria-label="Outcome">
+                                <option value="" disabled {% if not run_form_values.outcome %}selected{% endif %}>Outcome&hellip;</option>
+                                {% for outcome in run_outcomes %}
+                                    <option value="{{ outcome.value }}" {% if run_form_values.outcome == outcome.value %}selected{% endif %}>{{ outcome.value.replace("_", " ") | capitalize }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="field field-narrow">
+                            <label for="run-duration">Minutes</label>
+                            <input type="number" id="run-duration" name="duration_minutes" min="0" placeholder="Optional" value="{{ run_form_values.duration_minutes | default('') }}" aria-label="Duration in minutes">
+                        </div>
+                    </div>
+                    <div class="log-run-fields">
+                        <div class="field">
+                            <label for="run-search-from">Search from</label>
+                            <input type="datetime-local" id="run-search-from" name="search_from" value="{{ run_form_values.search_from | default('') }}" aria-label="Search from">
+                        </div>
+                        <div class="field">
+                            <label for="run-search-to">Search to</label>
+                            <input type="datetime-local" id="run-search-to" name="search_to" value="{{ run_form_values.search_to | default('') }}" aria-label="Search to">
+                        </div>
+                        <div class="field field-narrow">
+                            <label for="run-result-count">Result count</label>
+                            <input type="number" id="run-result-count" name="result_count" min="0" placeholder="Optional" value="{{ run_form_values.result_count | default('') }}" aria-label="Result count">
+                        </div>
+                    </div>
+                    <p class="field-hint">Search from and to are optional, but if used, both are required and from must not be after to.</p>
+                    <div class="field">
+                        <label for="run-notes">Notes</label>
+                        <textarea id="run-notes" name="notes" rows="2" placeholder="Optional markdown notes" aria-label="Run notes">{{ run_form_values.notes | default('') }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Log run</button>
+                </form>
+            </section>
+            {% endif %}
+
+            <section class="panel">
+                <h2>Run history</h2>
+                {% if hunt.runs_by_recency %}
+                    <div class="run-history">
+                        {% for run in hunt.runs_by_recency %}
+                            {% include "partials/run_row.html" with context %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="empty-state">{% if is_retired %}No runs were logged before this hunt was retired.{% else %}No runs logged yet. Use the form above once this hunt has been executed.{% endif %}</p>
+                {% endif %}
+            </section>
+
+            <section class="panel">
+                <h2>Active exclusions</h2>
+                {% if hunt.active_exclusions %}
+                    <table class="exclusions-table">
+                        <thead>
+                            <tr><th>Value</th><th>Reason</th><th>Added</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                            {% for exclusion in hunt.active_exclusions %}
+                                <tr>
+                                    <td>{{ exclusion.value }}</td>
+                                    <td>{{ exclusion.reason }}</td>
+                                    <td>{{ exclusion.created_at.date() }}</td>
+                                    <td>
+                                        <form hx-post="/hunts/{{ hunt.id }}/exclusions/{{ exclusion.id }}/deactivate" hx-target="#hunt-main" hx-swap="outerHTML">
+                                            <button type="submit" class="btn btn-secondary btn-small">Deactivate</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="empty-state">No active exclusions.</p>
+                {% endif %}
+
+                {% if not is_retired %}
+                <form hx-post="/hunts/{{ hunt.id }}/exclusions" hx-target="#hunt-main" hx-swap="outerHTML" class="exclusion-form">
+                    <div class="field">
+                        <label for="exclusion-value">Value</label>
+                        <input type="text" id="exclusion-value" name="value" placeholder="Host, domain, etc." aria-label="Exclusion value" required>
+                    </div>
+                    <div class="field">
+                        <label for="exclusion-reason">Reason</label>
+                        <input type="text" id="exclusion-reason" name="reason" placeholder="Why it's excluded" aria-label="Exclusion reason" required>
+                    </div>
+                    <button type="submit" class="btn btn-secondary">Add exclusion</button>
+                </form>
+                {% endif %}
+            </section>
+        </div>
+
+        <aside class="detail-sidebar">
+            <section class="panel">
+                <h2>Summary</h2>
+                <dl class="summary-list">
+                    <dt>Status</dt>
+                    <dd>{{ hunt.status.value | capitalize }}</dd>
+
+                    <dt>Priority</dt>
+                    <dd>{{ hunt.priority }}</dd>
+
+                    <dt>Data sources</dt>
+                    <dd>
+                        {% if hunt.data_sources %}
+                            <span class="chip-row">
+                                {% for source in hunt.data_sources.split(",") %}
+                                    {% if source.strip() %}<span class="chip">{{ source.strip() }}</span>{% endif %}
+                                {% endfor %}
+                            </span>
+                        {% else %}&mdash;{% endif %}
+                    </dd>
+
+                    <dt>ATT&amp;CK techniques</dt>
+                    <dd>
+                        {% if hunt.attack_techniques %}
+                            <span class="chip-row">
+                                {% for technique in hunt.attack_techniques.split(",") %}
+                                    {% if technique.strip() %}<span class="chip chip-mono">{{ technique.strip() }}</span>{% endif %}
+                                {% endfor %}
+                            </span>
+                        {% else %}&mdash;{% endif %}
+                    </dd>
+
+                    <dt>Cadence</dt>
+                    <dd>{% if hunt.cadence_days %}{{ hunt.cadence_days }} days{% else %}One-off{% endif %}</dd>
+
+                    <dt>Last run</dt>
+                    <dd>{% if hunt.runs_by_recency %}{{ hunt.runs_by_recency[0].ran_at.date() }}{% else %}&mdash;{% endif %}</dd>
+
+                    <dt>Next run</dt>
+                    <dd class="{{ 'overdue' if hunt.is_overdue else '' }}">
+                        {% if hunt.status.value == "retired" %}Not scheduled &mdash; retired{% elif hunt.next_run %}{{ hunt.next_run }}{% if hunt.is_overdue %} &mdash; overdue{% endif %}{% elif hunt.cadence_days %}Not scheduled yet{% else %}No cadence set{% endif %}
+                    </dd>
+
+                    <dt>Created</dt>
+                    <dd>{{ hunt.created_at.date() }}</dd>
+
+                    <dt>Updated</dt>
+                    <dd>{{ hunt.updated_at.date() }}</dd>
+                </dl>
+            </section>
+
+            <section class="panel">
+                <h2>Campaigns</h2>
+                {% if hunt.campaigns %}
+                    <ul class="chip-row chip-list">
+                        {% for campaign in hunt.campaigns %}
+                            <li><a href="/campaigns/{{ campaign.id }}" class="chip">{{ campaign.title }}</a></li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="empty-state">Not linked to any campaign yet.</p>
+                {% endif %}
+            </section>
+
+            {% if hunt.was_ever_retired %}
+                <section class="panel">
+                    <h2>{{ "Retirement" if hunt.status.value == "retired" else "Previous retirement" }}</h2>
+                    <p class="retirement-reason">{{ hunt.retirement_reason_label }}</p>
+                    {% if hunt.retired_at %}
+                        <p class="retirement-date">Retired {{ hunt.retired_at.date() }}</p>
+                    {% endif %}
+                    {% if hunt.retirement_note %}
+                        <div class="retirement-note prose">{{ hunt.retirement_note | markdown }}</div>
+                    {% endif %}
+                </section>
+            {% endif %}
+        </aside>
+    </div>
+</div>

@@ -1,0 +1,27 @@
+<div class="heatmap-day-result" data-date="{{ detail.day.isoformat() }}" data-announce="{{ detail.announcement }}">
+    <h3 class="heatmap-day-title">{{ detail.date_label }}</h3>
+    <p class="heatmap-day-summary">
+        <strong>{{ detail.run_count }}</strong> run{{ "" if detail.run_count == 1 else "s" }}
+        &middot; {{ detail.hunt_count }} hunt{{ "" if detail.hunt_count == 1 else "s" }}
+        &middot; {{ detail.findings_count }} marked Findings
+        <span class="heatmap-day-basis">Times are when each run was recorded ({{ detail.timezone_label }}). Newest first.</span>
+    </p>
+    {% if detail.runs %}
+        <ol class="heatmap-day-list">
+            {% for run in detail.runs %}
+                <li class="heatmap-day-run">
+                    <div class="heatmap-day-run-head">
+                        <a href="/hunts/{{ run.hunt_id }}" class="heatmap-day-hunt">{{ run.hunt_title }}</a>
+                        <span class="badge badge-outcome{{ ' badge-findings' if run.outcome.value == 'findings' else '' }}">{{ run.outcome_label }}</span>
+                        <a href="/hunts/{{ run.hunt_id }}#run-{{ run.run_id }}" class="heatmap-day-time">{{ run.time_label }} &middot; view run</a>
+                    </div>
+                    {% if run.notes_preview %}
+                        <p class="heatmap-day-notes">{{ run.notes_preview }}</p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ol>
+    {% else %}
+        <p class="empty-state">No runs were recorded on this day.</p>
+    {% endif %}
+</div>

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{{ campaign.title }} &middot; Hunt Tracker</title>
+    <link rel="stylesheet" href="/static/themes/terminal-console.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="htmx-config" content='{"allowScriptTags": false, "allowEval": false}'>
+    <script src="/static/htmx.min.js"></script>
+    <script src="/static/csrf.js"></script>
+</head>
+<body>
+    {% set shell_context = "Campaign" %}
+    {% include "partials/topbar.html" %}
+    <main class="container-fluid">
+        <p class="detail-breadcrumb"><a href="/campaigns">&larr; Campaigns</a></p>
+
+        {% include "partials/campaign_header.html" %}
+
+        <nav class="tab-nav" aria-label="Campaign sections">
+            <a href="/campaigns/{{ campaign.id }}?tab=overview" class="{{ 'tab-active' if tab == 'overview' else '' }}">Overview</a>
+            <a href="/campaigns/{{ campaign.id }}?tab=activity" class="{{ 'tab-active' if tab == 'activity' else '' }}">Activity</a>
+        </nav>
+
+        {% if tab == "activity" %}
+            {% include "partials/campaign_activity.html" %}
+        {% else %}
+            {% include "partials/campaign_overview.html" %}
+        {% endif %}
+    </main>
+</body>
+</html>
