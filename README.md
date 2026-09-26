@@ -110,7 +110,7 @@ Campaigns group hunts around a broader investigation, threat scenario, technolog
 ### Understand the hunting program
 
 <p align="center">
-  <img src="screenshots/insights.png" alt="Hunt Tracker insights" width="100%">
+  <img src="screenshots/insights-heatmap.png" alt="Hunt Tracker insights" width="100%">
 </p>
 
 Insights provide a lightweight view into hunting activity, lifecycle distribution, run outcomes, retirement reasons, and how the program evolves over time.
